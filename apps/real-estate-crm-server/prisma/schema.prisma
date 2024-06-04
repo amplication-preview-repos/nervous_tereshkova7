@@ -1,0 +1,117 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DB_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Property {
+  address      String?
+  amenities    EnumPropertyAmenities[]
+  appointments Appointment[]
+  assignments  Assignment[]
+  beachAccess  Boolean?
+  createdAt    DateTime                @default(now())
+  description  String?
+  extraInfos   ExtraInfo[]
+  id           String                  @id @default(cuid())
+  media        Json?
+  name         String?
+  price        Float?
+  rooms        Int?
+  status       EnumPropertyStatus?
+  typeField    EnumPropertyTypeField?
+  updatedAt    DateTime                @updatedAt
+}
+
+model Agent {
+  appointments Appointment[]
+  assignments  Assignment[]
+  createdAt    DateTime      @default(now())
+  email        String?
+  id           String        @id @default(cuid())
+  name         String?
+  phone        String?
+  updatedAt    DateTime      @updatedAt
+  user         User?         @relation(name: "AgentsOnUser", fields: [userId], references: [id])
+  userId       String?
+  users        User[]        @relation(name: "AgentOnUsers")
+}
+
+model Assignment {
+  agent      Agent?    @relation(fields: [agentId], references: [id])
+  agentId    String?
+  createdAt  DateTime  @default(now())
+  id         String    @id @default(cuid())
+  property   Property? @relation(fields: [propertyId], references: [id])
+  propertyId String?
+  updatedAt  DateTime  @updatedAt
+}
+
+model Appointment {
+  agent      Agent?    @relation(fields: [agentId], references: [id])
+  agentId    String?
+  client     Client?   @relation(fields: [clientId], references: [id])
+  clientId   String?
+  createdAt  DateTime  @default(now())
+  dateTime   DateTime?
+  id         String    @id @default(cuid())
+  property   Property? @relation(fields: [propertyId], references: [id])
+  propertyId String?
+  updatedAt  DateTime  @updatedAt
+}
+
+model Client {
+  appointments Appointment[]
+  createdAt    DateTime      @default(now())
+  email        String?
+  id           String        @id @default(cuid())
+  name         String?
+  phone        String?
+  updatedAt    DateTime      @updatedAt
+  user         User?         @relation(name: "ClientsOnUser", fields: [userId], references: [id])
+  userId       String?
+  users        User[]        @relation(name: "ClientOnUsers")
+}
+
+model User {
+  agent     Agent?   @relation(name: "AgentOnUsers", fields: [agentId], references: [id])
+  agentId   String?
+  agents    Agent[]  @relation(name: "AgentsOnUser")
+  client    Client?  @relation(name: "ClientOnUsers", fields: [clientId], references: [id])
+  clientId  String?
+  clients   Client[] @relation(name: "ClientsOnUser")
+  createdAt DateTime @default(now())
+  email     String?  @unique
+  firstName String?
+  id        String   @id @default(cuid())
+  lastName  String?
+  password  String
+  roles     Json
+  updatedAt DateTime @updatedAt
+  username  String   @unique
+}
+
+model ExtraInfo {
+  createdAt  DateTime  @default(now())
+  id         String    @id @default(cuid())
+  key        String?
+  property   Property? @relation(fields: [propertyId], references: [id])
+  propertyId String?
+  updatedAt  DateTime  @updatedAt
+  value      String?
+}
+
+enum EnumPropertyAmenities {
+  Option1
+}
+
+enum EnumPropertyStatus {
+  Option1
+}
+
+enum EnumPropertyTypeField {
+  Option1
+}
